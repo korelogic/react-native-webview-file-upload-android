@@ -1,9 +1,17 @@
 package com.oblongmana.webviewfileuploadandroid;
 
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.Context;
+import android.os.Environment;
+import android.view.MotionEvent;
+import android.view.View;
+import android.webkit.URLUtil;
+import android.widget.Toast;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.webkit.DownloadListener;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.ValueCallback;
@@ -77,6 +85,53 @@ public class AndroidWebViewManager extends ReactWebViewManager {
                 }
             }
         });
+        view.setDownloadListener(new DownloadListener() {
+            public void onDownloadStart(String url, String userAgent,
+                    String contentDisposition, String mimetype,
+                    long contentLength) {
+
+                String fileName = URLUtil.guessFileName(url,contentDisposition,mimetype);
+                String downloadMessage = "Downloading " + fileName;
+
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                request.addRequestHeader("User-Agent", userAgent);
+                request.setTitle(fileName);
+                request.setDescription(downloadMessage);
+                request.allowScanningByMediaScanner();
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+
+                DownloadManager dm = (DownloadManager) module.getActivity().getBaseContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                dm.enqueue(request);
+
+                Toast.makeText(module.getActivity().getApplicationContext(), downloadMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+
+        //jhwang edit start
+        view.setFocusable(true);
+        view.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                switch (event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_UP:
+                        if (!v.hasFocus())
+                        {
+                            v.requestFocus();
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
+        //jhwang edit end
+
+
+
         return view;
     }
 
