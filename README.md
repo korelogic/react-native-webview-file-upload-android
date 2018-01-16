@@ -11,6 +11,7 @@ undocumented APIs prior? Very spotty APIs anyway, and not built-in to WebView)
 
 <!-- MarkdownTOC -->
 
+- [React Native Version Compatibility](#react-native-version-compatibility)
 - [Limitations](#limitations)
 - [Further background reading](#further-background-reading)
 - [Requirements](#requirements)
@@ -21,6 +22,24 @@ undocumented APIs prior? Very spotty APIs anyway, and not built-in to WebView)
 - [Contributing](#contributing)
 
 <!-- /MarkdownTOC -->
+
+## React Native Version Compatibility
+
+The version of this available in npm has been tested on RN 0.40.0, but breaks on
+RN 0.44.0. This repo is an awkward place where its scope has slightly expanded
+(adding in the ability to DOWNLOAD files, as well as upload), and being
+difficult, if not impossible, to maintain compatibility with all versions of
+React Native.
+
+At present, if you want support for anything beyond 0.44.0, alter your
+package.json for this to point at the commit #4f8c1a775750788dc2464dea8dd189b7a41ea17b.
+So for example:
+```
+"react-native-webview-file-upload-android": "github:oblongmana/react-native-webview-file-upload-android#4f8c1a775750788dc2464dea8dd189b7a41ea17b"
+```
+
+In future, may update the npm published version to include these changes, so
+we're supporting the latest RN at all times
 
 ## Limitations
 - This is untested on most Android platforms at time of writing. This was tested
