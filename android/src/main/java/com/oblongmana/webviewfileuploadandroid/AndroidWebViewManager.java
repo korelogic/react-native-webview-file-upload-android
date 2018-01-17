@@ -128,6 +128,11 @@ public class AndroidWebViewManager extends ReactWebViewManager {
                 return false;
             }
         });
+
+        // 设置4.2以后版本支持autoPlay，非用户手势促发
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            view.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        }
         //jhwang edit end
 
 
