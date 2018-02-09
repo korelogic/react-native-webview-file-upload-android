@@ -38,7 +38,7 @@ public class AndroidWebViewManager extends ReactWebViewManager {
         WebView view = super.createViewInstance(reactContext);
         //Now do our own setWebChromeClient, patching in file chooser support
         final AndroidWebViewModule module = this.aPackage.getModule();
-        view.setWebChromeClient(new WebChromeClient(){
+        view.setWebChromeClient(new VideoWebChromeClient(reactContext.getCurrentActivity(), view){
 
             public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
                 module.setUploadMessage(uploadMsg);
