@@ -1,14 +1,9 @@
 # react-native-webview-file-upload-android
-ReactNative's WebView on Android does not support file input. This library
-adds in an `<AndroidWebView>` that does support file input.
+- ReactNative's WebView on Android does not support file input .
+- Cannot support HTML5 video fullscreen play 
+This library adds in an `<AndroidWebView>` that does support these
 
 *PLEASE READ THE LIMITATIONS SECTION FIRST*
-
-The lack of support appears to be due to Android-level limitations -
-specifically that there is no API available for this prior to Android 5 (except
-kind of between 4 and 4.4.1 possibly, hard to read from discussions? And using
-undocumented APIs prior? Very spotty APIs anyway, and not built-in to WebView)
-
 <!-- MarkdownTOC -->
 
 - [React Native Version Compatibility](#react-native-version-compatibility)
@@ -25,21 +20,15 @@ undocumented APIs prior? Very spotty APIs anyway, and not built-in to WebView)
 
 ## React Native Version Compatibility
 
-The version of this available in npm has been tested on RN 0.40.0, but breaks on
-RN 0.44.0. This repo is an awkward place where its scope has slightly expanded
-(adding in the ability to DOWNLOAD files, as well as upload), and being
-difficult, if not impossible, to maintain compatibility with all versions of
-React Native.
+The version of this available in npm has been tested on RN 0.54.0
 
-At present, if you want support for anything beyond 0.44.0, alter your
-package.json for this to point at the commit #4f8c1a775750788dc2464dea8dd189b7a41ea17b.
+edit package.json :
 So for example:
 ```
-"react-native-webview-file-upload-android": "github:oblongmana/react-native-webview-file-upload-android#4f8c1a775750788dc2464dea8dd189b7a41ea17b"
+"react-native-webview-file-upload-android": "git+https://github.com/haozes/react-native-webview-file-upload-android.git",
 ```
 
-In future, may update the npm published version to include these changes, so
-we're supporting the latest RN at all times
+
 
 ## Limitations
 - This is untested on most Android platforms at time of writing. This was tested
@@ -80,13 +69,13 @@ library.
 
 ## Requirements
 This has been tested with (and has a peerDependency in package.json on
-`react-native` `^0.40.0`). It _might_ work with earlier versions. If it does,
+`react-native` `^0.50.0`). It _might_ work with earlier versions. If it does,
 please feel free to open a PR amending the peerDependencies in package.json.
 
 ## Installation
 
 Install the library into your project
-`npm install react-native-webview-file-upload-android --save`
+`npm install https://github.com/haozes/react-native-webview-file-upload-android --save`
 
 ### Manual Linking
 
