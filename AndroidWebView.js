@@ -9,9 +9,9 @@
  * @providesModule AndroidWebView
  */
 import React, {
-  Component,
-  PropTypes,
+  Component
 } from 'react';
+import PropTypes from 'prop-types';
 import ReactNative, {
   EdgeInsetsPropType,
   ActivityIndicator,
@@ -92,7 +92,7 @@ const defaultRenderLoading = () => (
 /**
  * Renders a native AndroidWebView that allows file upload.
  */
-class AndroidWebView extends Component {
+class AndroidWebView extends Component<Props>  {
   static propTypes = {
     ...View.propTypes,
     renderError: PropTypes.func,
@@ -168,6 +168,13 @@ class AndroidWebView extends Component {
      */
     javaScriptEnabled: PropTypes.bool,
 
+      /**
+       * Used on Android Lollipop and above only, third party cookies are enabled
+       * by default for WebView on Android Kitkat and below and on iOS
+       * @platform android
+       */
+      thirdPartyCookiesEnabled: PropTypes.bool,
+
     /**
      * Used on Android only, controls whether DOM Storage is enabled or not
      * @platform android
@@ -241,12 +248,14 @@ class AndroidWebView extends Component {
      * Make upload file available
      */
     uploadEnabledAndroid: PropTypes.bool,
+      urlPrefixesForDefaultIntent: PropTypes.arrayOf(PropTypes.string),
   };
 
   static defaultProps = {
-    javaScriptEnabled: true,
-    scalesPageToFit: true,
-    saveFormDataDisabled: false
+      javaScriptEnabled : true,
+      thirdPartyCookiesEnabled: true,
+      scalesPageToFit: true,
+      saveFormDataDisabled: false
   };
 
   state = {
@@ -407,6 +416,7 @@ class AndroidWebView extends Component {
         injectedJavaScript={this.props.injectedJavaScript}
         userAgent={this.props.userAgent}
         javaScriptEnabled={this.props.javaScriptEnabled}
+        thirdPartyCookiesEnabled={this.props.thirdPartyCookiesEnabled}
         domStorageEnabled={this.props.domStorageEnabled}
         messagingEnabled={typeof this.props.onMessage === 'function'}
         onMessage={this.onMessage}
@@ -422,6 +432,7 @@ class AndroidWebView extends Component {
         mixedContentMode={this.props.mixedContentMode}
         saveFormDataDisabled={this.props.saveFormDataDisabled}
         uploadEnabledAndroid={true}
+        urlPrefixesForDefaultIntent={this.props.urlPrefixesForDefaultIntent}
       />
     );
 
