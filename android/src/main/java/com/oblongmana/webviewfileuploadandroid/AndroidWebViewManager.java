@@ -1,9 +1,13 @@
 package com.oblongmana.webviewfileuploadandroid;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.URLUtil;
@@ -38,7 +42,8 @@ public class AndroidWebViewManager extends ReactWebViewManager {
         WebView view = super.createViewInstance(reactContext);
         //Now do our own setWebChromeClient, patching in file chooser support
         final AndroidWebViewModule module = this.aPackage.getModule();
-        view.setWebChromeClient(new VideoWebChromeClient(reactContext.getCurrentActivity(), view){
+        mActivity = reactContext.getCurrentActivity();
+        view.setWebChromeClient(new VideoWebChromeClient(mActivity, view){
 
             public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
                 module.setUploadMessage(uploadMsg);
@@ -91,7 +96,12 @@ public class AndroidWebViewManager extends ReactWebViewManager {
                     String contentDisposition, String mimetype,
                     long contentLength) {
 
-                String fileName = URLUtil.guessFileName(url,contentDisposition,mimetype);
+                if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+                    return;
+                }
+
+                String fileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
                 String downloadMessage = "Downloading " + fileName;
 
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
