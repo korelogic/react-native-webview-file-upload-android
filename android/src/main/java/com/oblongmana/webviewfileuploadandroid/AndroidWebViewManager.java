@@ -10,6 +10,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 import android.content.Intent;
@@ -105,6 +106,8 @@ public class AndroidWebViewManager extends ReactWebViewManager {
                 String downloadMessage = "Downloading " + fileName;
 
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                String cookies = CookieManager.getInstance().getCookie(url);
+                request.addRequestHeader("cookie", cookies);
                 request.addRequestHeader("User-Agent", userAgent);
                 request.setTitle(fileName);
                 request.setDescription(downloadMessage);
