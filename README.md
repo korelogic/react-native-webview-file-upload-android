@@ -20,20 +20,17 @@ This library adds in an `<AndroidWebView>` that does support these
 
 ## React Native Version Compatibility
 
-The version of this available in npm has been tested on RN 0.54.0
+The version of this available on github has been tested on RN 0.56.0
 
 edit package.json :
 So for example:
 ```
-"react-native-webview-file-upload-android": "git+https://github.com/haozes/react-native-webview-file-upload-android.git",
+"react-native-webview-file-upload-android": "git+https://github.com/FieldLevel/react-native-webview-file-upload-android.git",
 ```
 
 
 
 ## Limitations
-- This is untested on most Android platforms at time of writing. This was tested
-in an AVD with following config: Nexus 5X API 25 x86, Android 7.1.1.
-
 - At present this library handles only uploading images picked from the gallery.
 
   This could likely be modified to support other file types, or to have generic

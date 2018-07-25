@@ -8,22 +8,21 @@
  *
  * @providesModule AndroidWebView
  */
-import React, {
-  Component
-} from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import ReactNative, {
   EdgeInsetsPropType,
   ActivityIndicator,
   StyleSheet,
   UIManager,
   View,
-    ViewPropTypes,
   requireNativeComponent,
 } from 'react-native';
+
+import PropTypes from 'prop-types';
 import warning from 'warning';
 import keyMirror from 'keymirror';
 import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
+import WebViewShared from 'react-native/Libraries/Components/WebView/WebViewShared';
 
 /**
  * Adds a function for warning Users of deprecated prop use (when something was
@@ -93,9 +92,9 @@ const defaultRenderLoading = () => (
 /**
  * Renders a native AndroidWebView that allows file upload.
  */
-class AndroidWebView extends Component<Props>  {
+class AndroidWebView extends Component {
   static propTypes = {
-    ...ViewPropTypes,
+    ...View.propTypes,
     renderError: PropTypes.func,
     renderLoading: PropTypes.func,
     onLoad: PropTypes.func,
@@ -108,7 +107,6 @@ class AndroidWebView extends Component<Props>  {
     onMessage: PropTypes.func,
     onContentSizeChange: PropTypes.func,
     startInLoadingState: PropTypes.bool, // force WebView to show loadingView on first load
-    style: ViewPropTypes.style,
 
     html: deprecatedPropType(
       PropTypes.string,
@@ -169,13 +167,6 @@ class AndroidWebView extends Component<Props>  {
      */
     javaScriptEnabled: PropTypes.bool,
 
-      /**
-       * Used on Android Lollipop and above only, third party cookies are enabled
-       * by default for WebView on Android Kitkat and below and on iOS
-       * @platform android
-       */
-      thirdPartyCookiesEnabled: PropTypes.bool,
-
     /**
      * Used on Android only, controls whether DOM Storage is enabled or not
      * @platform android
@@ -208,6 +199,10 @@ class AndroidWebView extends Component<Props>  {
      * start playing. The default value is `false`.
      */
     mediaPlaybackRequiresUserAction: PropTypes.bool,
+    /**
+     * Make upload file available
+     */
+    uploadEnabledAndroid: PropTypes.bool,
 
     /**
      * Boolean that sets whether JavaScript running in the context of a file
@@ -217,46 +212,21 @@ class AndroidWebView extends Component<Props>  {
      */
     allowUniversalAccessFromFileURLs: PropTypes.bool,
 
-    /**
-     * Function that accepts a string that will be passed to the WebView and
-     * executed immediately as JavaScript.
-     */
-    injectJavaScript: PropTypes.func,
+    mixedContentMode: PropTypes.string,
 
-    /**
-     * Specifies the mixed content mode. i.e WebView will allow a secure origin to load content from any other origin.
-     *
-     * Possible values for `mixedContentMode` are:
-     *
-     * - `'never'` (default) - WebView will not allow a secure origin to load content from an insecure origin.
-     * - `'always'` - WebView will allow a secure origin to load content from any other origin, even if that origin is insecure.
-     * - `'compatibility'` -  WebView will attempt to be compatible with the approach of a modern web browser with regard to mixed content.
-     * @platform android
-     */
-    mixedContentMode: PropTypes.oneOf([
-      'never',
-      'always',
-      'compatibility'
-    ]),
-
-    /**
-     * Used on Android only, controls whether form autocomplete data should be saved
-     * @platform android
-     */
     saveFormDataDisabled: PropTypes.bool,
 
-    /**
-     * Make upload file available
-     */
-    uploadEnabledAndroid: PropTypes.bool,
-      urlPrefixesForDefaultIntent: PropTypes.arrayOf(PropTypes.string),
+    thirdPartyCookiesEnabled: PropTypes.bool,
+
+    urlPrefixesForDefaultIntent: PropTypes.arrayOf(PropTypes.string),
+
+    originWhitelist: PropTypes.arrayOf(PropTypes.string),
   };
 
   static defaultProps = {
-      javaScriptEnabled : true,
-      thirdPartyCookiesEnabled: true,
-      scalesPageToFit: true,
-      saveFormDataDisabled: false
+    javaScriptEnabled: true,
+    scalesPageToFit: true,
+    originWhitelist: WebViewShared.defaultOriginWhitelist,
   };
 
   state = {
@@ -300,10 +270,10 @@ class AndroidWebView extends Component<Props>  {
     this.updateNavigationState(event);
   };
 
-  onMessage = (event: Event) => {
+  onMessage = (event) => {
     const { onMessage } = this.props;
     onMessage && onMessage(event);
-  }
+  };
 
   getWebViewHandle = () => ReactNative.findNodeHandle(this[RCT_WEBVIEW_REF]);
 
@@ -332,20 +302,6 @@ class AndroidWebView extends Component<Props>  {
     );
   };
 
-  /**
-  * Injects a javascript string into the referenced WebView. Deliberately does not
-  * return a response because using eval() to return a response breaks this method
-  * on pages with a Content Security Policy that disallows eval(). If you need that
-  * functionality, look into postMessage/onMessage.
-  */
-  injectJavaScript = (data) => {
-    UIManager.dispatchViewManagerCommand(
-      this.getWebViewHandle(),
-      UIManager.RCTWebView.Commands.injectJavaScript,
-      [data]
-    );
-  };
-
   reload = () => {
     UIManager.dispatchViewManagerCommand(
       this.getWebViewHandle(),
@@ -359,6 +315,14 @@ class AndroidWebView extends Component<Props>  {
       this.getWebViewHandle(),
       UIManager.RCTWebView.Commands.stopLoading,
       null,
+    );
+  };
+
+  injectJavaScript = (data) => {
+    UIManager.dispatchViewManagerCommand(
+      this.getWebViewHandle(),
+      UIManager.RCTWebView.Commands.injectJavaScript,
+      [data],
     );
   };
 
@@ -407,6 +371,12 @@ class AndroidWebView extends Component<Props>  {
       console.warn('WebView: `source.body` is not supported when using GET.');
     }
 
+    if (this.props.urlPrefixesForDefaultIntent != null) {
+      console.warn('WebView: `urlPrefixesForDefaultIntent` is not supported');
+    }
+
+    const originWhitelist = (this.props.originWhitelist || []).map(WebViewShared.originWhitelistToRegex);
+
     const webView = (
       <WebViewForAndroid
         ref={(c) => { this[RCT_WEBVIEW_REF] = c; }}
@@ -417,7 +387,6 @@ class AndroidWebView extends Component<Props>  {
         injectedJavaScript={this.props.injectedJavaScript}
         userAgent={this.props.userAgent}
         javaScriptEnabled={this.props.javaScriptEnabled}
-        thirdPartyCookiesEnabled={this.props.thirdPartyCookiesEnabled}
         domStorageEnabled={this.props.domStorageEnabled}
         messagingEnabled={typeof this.props.onMessage === 'function'}
         onMessage={this.onMessage}
@@ -429,11 +398,9 @@ class AndroidWebView extends Component<Props>  {
         onLoadingError={this.onLoadingError}
         testID={this.props.testID}
         mediaPlaybackRequiresUserAction={this.props.mediaPlaybackRequiresUserAction}
-        allowUniversalAccessFromFileURLs={this.props.allowUniversalAccessFromFileURLs}
-        mixedContentMode={this.props.mixedContentMode}
-        saveFormDataDisabled={this.props.saveFormDataDisabled}
         uploadEnabledAndroid={true}
-        urlPrefixesForDefaultIntent={this.props.urlPrefixesForDefaultIntent}
+        mixedContentMode={this.props.mixedContentMode}
+        originWhitelist={originWhitelist}
       />
     );
 
