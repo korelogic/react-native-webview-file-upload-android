@@ -37,6 +37,11 @@ public class AndroidWebViewManager extends ReactWebViewManager {
     public String getName() {
         return "AndroidWebView";
     }
+    
+   @Override
+   public boolean shouldOverrideUrlLoading(WebView view, String url) {
+       return false;
+   }
 
     @Override
     protected WebView createViewInstance(ThemedReactContext reactContext) {
